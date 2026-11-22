@@ -31,3 +31,14 @@ montada que foi gravada pelo analisador léxico)
 	"""
 
 
+from tabela_de_palavras_e_simbolos_reservados import criar_tabela
+
+
+def main() -> None:
+    # 1. Criar e popular a tabela de palavras e símbolos reservados.
+    tabela_de_reservados = criar_tabela()
+    print(f"Tabela de reservados criada: {len(tabela_de_reservados)} entradas.")  # conferência temporária
+
+
+if __name__ == "__main__":
+    main()

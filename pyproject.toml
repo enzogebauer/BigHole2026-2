@@ -1,7 +1,7 @@
 [project]
 name = "bighole2026-2"
 version = "0.1.0"
-description = "Add your description here"
+description = "Esse é o projeto de analisador léxico desenvolvido durante o trabalho final da disciplina de Compiladores."
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = []
