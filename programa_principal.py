@@ -32,12 +32,19 @@ montada que foi gravada pelo analisador léxico)
 
 
 from tabela_de_palavras_e_simbolos_reservados import criar_tabela
+from tabela_de_simbolos import TabelaDeSimbolos
 
 
 def main() -> None:
     # 1. Criar e popular a tabela de palavras e símbolos reservados.
     tabela_de_reservados = criar_tabela()
-    print(f"Tabela de reservados criada: {len(tabela_de_reservados)} entradas.")  # conferência temporária
+
+    # 2. Criar a tabela de símbolos, vazia.
+    tabela_de_simbolos = TabelaDeSimbolos()
+
+    # conferência temporária
+    print(f"Tabela de reservados: {len(tabela_de_reservados)} entradas.")
+    print(f"Tabela de símbolos: {len(tabela_de_simbolos.entradas())} entradas.")
 
 
 if __name__ == "__main__":
