@@ -18,6 +18,7 @@ Retornar átomo (lexeme, código, índice na tab de símbolos ou None, linha)
 import string
 from dataclasses import dataclass
 
+from tabela_de_palavras_e_simbolos_reservados import buscar
 from tabela_de_simbolos import TabelaDeSimbolos
 
 CODIGO_FIM_DE_ARQUIVO = "EOF"
@@ -111,3 +112,71 @@ def pular_brancos_invalidos_e_comentarios(fonte: Fonte) -> None:
             fonte.avancar()  # a / do fechamento
         else:
             return
+
+
+def ler_identificador_ou_reservada(fonte: Fonte, contexto: ContextoDaAnalise, linha: int) -> Atomo:
+    """Lê letras, dígitos e _ pelo máximo comprimento, a partir de uma letra ou _.
+
+    Caracteres inválidos no meio são pulados sem contar e sem delimitar (va@r1 → VAR1).
+    O lexeme sai em maiúsculas, com no máximo 30 caracteres guardados.
+    Palavra reservada sai só com o código. Senão, o código vem do escopo atual
+    (lexeme com _ é sempre C01) e o lexeme é registrado na tabela de símbolos.
+    """
+    caracteres_guardados: list[str] = []
+    quantidade_antes_truncagem = 0
+    while (caractere := fonte.caractere_atual()) is not None:
+        if caractere not in CARACTERES_VALIDOS:
+            fonte.avancar()
+        elif caractere.isalnum() or caractere == "_":
+            quantidade_antes_truncagem += 1
+            if len(caracteres_guardados) < TAMANHO_MAXIMO_DO_LEXEME:
+                caracteres_guardados.append(caractere.upper())
+            fonte.avancar()
+        else:
+            break
+    lexeme = "".join(caracteres_guardados)
+
+    codigo = buscar(contexto.tabela_de_reservados, lexeme)
+    if codigo is not None:
+        return Atomo(lexeme, codigo, None, linha)
+
+    codigo = "C01" if "_" in lexeme else contexto.escopo_atual
+    indice = contexto.tabela_de_simbolos.registrar(
+        lexeme, codigo, quantidade_antes_truncagem, len(lexeme), linha
+    )
+    codigo = contexto.tabela_de_simbolos.entradas_em_ordem[indice - 1].codigo_do_atomo
+    return Atomo(lexeme, codigo, indice, linha)
+
+
+def proximo_atomo(fonte: Fonte, contexto: ContextoDaAnalise) -> Atomo:
+    """Reconhece e devolve o próximo átomo do texto fonte.
+
+    No fim do texto, devolve o átomo de fim de arquivo. Símbolos compostos
+    (:= == != <= >=) são testados antes dos simples. Um caractere válido que
+    não inicia nenhum padrão ($, ., = ou ! sozinhos) delimita e é descartado,
+    e a busca recomeça do início.
+    """
+    while True:
+        pular_brancos_invalidos_e_comentarios(fonte)
+        caractere = fonte.caractere_atual()
+        if caractere is None:
+            return Atomo("", CODIGO_FIM_DE_ARQUIVO, None, fonte.linha)
+        linha = fonte.linha
+
+        if caractere.isalpha() or caractere == "_":
+            return ler_identificador_ou_reservada(fonte, contexto, linha)
+
+        if caractere.isdigit() or caractere in "\"'":
+            raise NotImplementedError(f"Padrão ainda não implementado: {caractere!r} (linha {linha})")
+
+        dois_caracteres = caractere + (fonte.espiar_proximo() or "")
+        codigo = buscar(contexto.tabela_de_reservados, dois_caracteres)
+        if len(dois_caracteres) == 2 and codigo is not None:
+            fonte.avancar()
+            fonte.avancar()
+            return Atomo(dois_caracteres, codigo, None, linha)
+
+        codigo = buscar(contexto.tabela_de_reservados, caractere)
+        fonte.avancar()
+        if codigo is not None:
+            return Atomo(caractere, codigo, None, linha)
