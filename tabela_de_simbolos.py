@@ -1,13 +1,13 @@
-"""Tabela de símbolos
-
-Guarda os identificadores e constantes criados por quem escreve o programa.
-Começa vazia e é preenchida pelo léxico durante a análise.
-- Uma entrada por lexeme; registros repetidos só acrescentam a linha.
-- Guarda até as cinco primeiras linhas em que o lexeme aparece (repetições contam).
-- O tipo das constantes vem do código do átomo (C04 ST, C05 CH, C06 IN, C07 FP).
-- definir_tipo só grava quando o tipo ainda está vazio ("-").
-- Número da entrada, código do átomo e lexeme não mudam depois de gravados.
-"""
+"""Tabela de simbolos
+índice do símbolo na tabela de símbolos (endereço do símbolo na tabela de símbolos, entrada)
+Lexeme (Lexical Element)
+Código do átomo que esse lexeme corresponde
+Tipo do símbolo (FP, IN, ST, CH, BL, VD, AF, AI, AS, AC, AB ou - quando não definido)
+Quantidade de caracteres antes do processo de truncagem.
+Quantidade de caracteres depois do processo de truncagem.
+Esses dois parâmetros vão dizer se a truncagem está sendo feita de forma correta.
+Cinco primeiras linhas onde esse átomo aparece no texto fonte.
+	"""
 
 from dataclasses import dataclass, field
 
